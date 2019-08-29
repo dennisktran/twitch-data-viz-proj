@@ -12,6 +12,8 @@ import Admin from '../Admin'
 
 import * as ROUTES from '../../constants/routes'
 
+console.log(process.env);
+
 const App = () => (
   <div>
     <Navigation />
