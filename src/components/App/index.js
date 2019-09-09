@@ -1,9 +1,9 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Route, Switch } from 'react-router-dom'
 
 import Navigation from '../Navigation'
-import Landing from '../Landing'
-import SignUp from '../Signup'
+import TopGames from '../Landing'
+import SignUp from '../SignUp'
 import SignIn from '../SignIn'
 import PasswordForget from '../PasswordForget'
 import Home from '../Home'
@@ -12,22 +12,27 @@ import Admin from '../Admin'
 
 import * as ROUTES from '../../constants/routes'
 
-console.log(process.env);
+const App = (props) => {
+  const [ userId, setUserId ] = useState(null)
 
-const App = () => (
+  console.log(userId);
+
+  return(
   <div>
     <Navigation />
     <hr />
+    {props.children}
     <Switch>
-      <Route exact path ={ROUTES.LANDING} component= {Landing}/>
+      <Route exact path ={ROUTES.LANDING} component= {TopGames}/>
       <Route exact path ={ROUTES.SIGN_UP} component= {SignUp}/>
       <Route exact path ={ROUTES.SIGN_IN} component= {SignIn}/>
       <Route exact path ={ROUTES.ACCOUNT} component= {Account}/>
       <Route exact path ={ROUTES.PASSWORD_FORGET} component= {PasswordForget}/>
-      <Route exact path ={ROUTES.HOME} component= {Home}/>
+      <Route exact path ={ROUTES.HOME} render= {() => <Home userId={userId} />}/>
       <Route exact path ={ROUTES.ADMIN} component= {Admin}/>
     </Switch>
   </div>
-)
+  )
+}
 
 export default App

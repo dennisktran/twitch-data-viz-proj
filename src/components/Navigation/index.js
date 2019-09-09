@@ -10,6 +10,10 @@ const Navigation = () => (
         <NavLink to={ROUTES.SIGN_IN}>SIGN IN</NavLink>
       </li>
       <li>
+        <NavLink to={ROUTES.SIGN_UP}>SIGN UP</NavLink>
+      </li>
+
+      <li>
         <NavLink to={ROUTES.HOME}>HOME</NavLink>
       </li>
       <li>
