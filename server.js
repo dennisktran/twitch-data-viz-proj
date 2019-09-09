@@ -31,7 +31,7 @@ app.get('/api', async (req,res)=>{
 })
 
 app.post('/game', async (req, res) => {
-  const gameResponse = await fetch(`https://api.twitch.tv/helix/streams?game_id=${req.body.id}`, {
+  const gameResponse = await fetch(`https://api.twitch.tv/helix/streams?game_id=${req.body.id}&first=100`, {
     headers: {
       "Client-ID": "fisr6jm358bu440cf6rgr8y5kgr7fn"
     }
@@ -42,6 +42,29 @@ app.post('/game', async (req, res) => {
     })
 })
 
+app.get('/streamer', async (req,res)=>{
+  const topStreamers = await fetch('https://api.twitch.tv/helix/streams?first=40', {
+    headers: {
+      "Client-ID": "fisr6jm358bu440cf6rgr8y5kgr7fn"
+    }
+  })
+  const parsed = await topStreamers.json()
+    res.json({
+      data: parsed
+    })
+})
+
+app.get('/profile', async (req,res)=>{
+  const topStreamers = await fetch('https://api.twitch.tv/helix/users?id=71092938', {
+    headers: {
+      "Client-ID": "fisr6jm358bu440cf6rgr8y5kgr7fn"
+    }
+  })
+  const parsed = await topStreamers.json()
+    res.json({
+      data: parsed
+    })
+})
 
 app.listen(port, () => {
   console.log(`Server running at  ${port}/`);

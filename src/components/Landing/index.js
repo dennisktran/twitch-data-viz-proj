@@ -1,6 +1,5 @@
 import React, { Component } from 'react'
 import { ResponsiveSunburst } from '@nivo/sunburst'
-import { render } from 'react-dom'
 
 class TopGames extends Component {
   state = {
@@ -16,7 +15,7 @@ class TopGames extends Component {
   getGames = async() => {
     try {
       const popResponse = await fetch('http://localhost:3001/api')
-      console.log(popResponse)
+
       const parsed = await popResponse.json()
 
       this.setState({
@@ -25,36 +24,60 @@ class TopGames extends Component {
         this.getViews()
       })
 
-      console.log(parsed);
     } catch(err) {
       console.log(err);
     }
   }
 
-    getViews = async () => {
-      try {
-        let games = []
-        await Promise.all(this.state.top.map(async(v) => {
-          let viewCount = 0
-          let users = []
+  imageHandler = (str,w,h)=>{
+    let array = str.split("-")
+    array[array.length -1] = `${w}x${h}.jpg`
+    return array.join("-")
+  }
 
-          const viewResponse = await fetch('http://localhost:3001/game', {
-            method: 'POST',
-            credentials: 'include',
-            body: JSON.stringify({id: v.id}),
-            headers: {
-              "Content-Type": "application/json"
-            }
-          })
-          const parsed = await viewResponse.json()
-          console.log(parsed, '<----- parsed')
-          parsed.data.data.forEach(streamer =>{
-            viewCount += streamer.viewer_count
-            users.push({user_name: streamer.user_name, viewer_count: streamer.viewer_count})
-          })
+  getStreamers = async() => {
+    try {
+      const userReponse = await fetch("http://localhost:3001/streamer")
+
+      const parsed = await userReponse.json()
+
+      this.setState({
+        popstreamer : parsed.data
+      })
+
+  } catch(err) {
+    console.log(err);
+  }
+}
+
+  getViews = async () => {
+    try {
+      let games = []
+      await Promise.all(this.state.top.map(async(v) => {
+        let viewCount = 0
+        let users = []
+        let boxArt = []
+
+        const viewResponse = await fetch('http://localhost:3001/game', {
+          method: 'POST',
+          credentials: 'include',
+          body: JSON.stringify({id: v.id}),
+          headers: {
+            "Content-Type": "application/json"
+          }
+        })
+        const parsed = await viewResponse.json()
+        parsed.data.data.forEach(streamer =>{
+          viewCount += streamer.viewer_count
+          users.push({user_name: streamer.user_name, viewer_count: streamer.viewer_count})
+        })
+
+         v.box_art_url = this.imageHandler(v.box_art_url, 100,150)
+
          return games.push({...v, viewCount, users, color: this.color()})
+
        }))
-       console.log("we are setting load to true")
+
        this.setState({
          top:games,
          load:true
@@ -65,30 +88,37 @@ class TopGames extends Component {
       }
     }
 
-    buildData = () => {
-      console.log("building data")
-      return  this.state.top.map(p => {
-        return  {
-            "name": p.name,
-            "color": `hsl(${p.color}, 70%, 50%)`,
-            loc: p.viewCount,
-            "children": p.users ? this.streamerData(p) : []
-          }
-        })
-}
-
-    streamerData = (game) => {
-      console.log(game)
-      return game.users.map(u=>{
-        return {
-          "name": u.user_name,
-          "color": "hsl(287, 70%, 50%)",
-          "loc": u.viewer_count
+  buildData = () => {
+    return  this.state.top.map(p => {
+      return  {
+          "name": p.name,
+          "color": `hsl(${p.color}, 70%, 50%)`,
+          "loc": p.viewCount,
+          "children": p.users ? this.streamerData(p) : []
         }
       })
     }
 
-    color = () =>{
+  streamerData = (game) => {
+    return game.users.map(u=>{
+      return {
+        "name": u.user_name,
+        "color": "hsl(287, 70%, 50%)",
+        "loc": u.viewer_count
+      }
+    })
+  }
+
+  listTopGames = () => {
+   const sorted = [...this.state.top].sort((a,b) => b.viewCount - a.viewCount)
+    return sorted.map(t => {
+
+      return <li> <img src = {t.box_art_url}/> {t.name}<br/> <i>View Count</i>: <b>{t.viewCount}</b> </li>
+
+    })
+  }
+
+  color = () =>{
       const array = new Array(20).fill("h")
       return array.map(g =>{
         return `rgb(${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)}, ${Math.floor(Math.random() * 256)})`
@@ -97,33 +127,47 @@ class TopGames extends Component {
 
 render(){
   console.log(this.buildData())
-  // console.log(this.streamerData())
   return(
-    
-    <div style={{ height: '50em', width: '50em' }}>
-    {this.state.load &&
-      <ResponsiveSunburst
-      data={{
-        "name": "top games",
-        "color": "hsl(287, 70%, 50%)",
-        "children": this.buildData()
-      }}
-      margin={{ top: 40, right: 20, bottom: 20, left: 20 }}
-      identity="name"
-      value="loc"
-      cornerRadius={2}
-      borderWidth={1}
-      borderColor="white"
-      colors={this.color()}
-      childColor={{ from: 'color'}}
-      animate={true}
-      motionStiffness={90}
-      motionDamping={15}
-      isInteractive={true}
-      />
-      }
-
+    <div style={{display:'flex'}}>
+      <div style={{ height: '100vh', width: '50vw', flex:'0 0 50%' }}>
+      {this.state.load &&
+        <ResponsiveSunburst
+        data={{
+          "name": "top games",
+          "color": "hsl(287, 70%, 50%)",
+          "children": this.buildData()
+        }}
+        margin={{ top: 40, right: 20, bottom: 20, left: 20 }}
+        identity="name"
+        value="loc"
+        cornerRadius={2.5}
+        borderWidth={1}
+        borderColor="white"
+        colors={this.color()}
+        childColor={{ from: 'color'}}
+        animate={true}
+        motionStiffness={90}
+        motionDamping={15}
+        isInteractive={true}
+        />
+        }
+        </div>
+        <div style={{flex:'1',position:'relative',display: 'flex'}}>
+          <div style={{position:"sticky", overflow:"scroll",height: '100vh'}}>
+            <b> Most Popular Games </b>
+            <ul>
+              {this.listTopGames()}<br/>
+            </ul>
+          </div>
+          <div style={{position:"sticky", overflow:"scroll",height: '100vh'}}>
+            <b> Top Streamers </b>
+            <ul>
+              {this.listTopGames()}<br/>
+            </ul>
+          </div>
+        </div>
       </div>
+
 
     )
   }
