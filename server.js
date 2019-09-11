@@ -8,7 +8,7 @@ const bodyParser     = require('body-parser');
 
 const corsOptions = {
   credentials: true,
-  origin: 'http://localhost:3000',
+  origin: ['http://localhost:3000','https://react-firestore-cf231.firebaseapp.com/'],
   optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
 }
 
@@ -43,7 +43,7 @@ app.post('/game', async (req, res) => {
 })
 
 app.get('/streamer', async (req,res)=>{
-  const topStreamers = await fetch('https://api.twitch.tv/helix/streams?first=40', {
+  const topStreamers = await fetch('https://api.twitch.tv/helix/streams?first=10', {
     headers: {
       "Client-ID": "fisr6jm358bu440cf6rgr8y5kgr7fn"
     }
@@ -54,8 +54,8 @@ app.get('/streamer', async (req,res)=>{
     })
 })
 
-app.get('/profile', async (req,res)=>{
-  const topStreamers = await fetch('https://api.twitch.tv/helix/users?id=71092938', {
+app.post('/profile', async (req,res)=>{
+  const topStreamers = await fetch(`https://api.twitch.tv/helix/users?id=${req.body.id}`, {
     headers: {
       "Client-ID": "fisr6jm358bu440cf6rgr8y5kgr7fn"
     }
