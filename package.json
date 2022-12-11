@@ -6,7 +6,7 @@
     "@nivo/sunburst": "^0.59.1",
     "chart.js": "^2.8.0",
     "cors": "^2.8.5",
-    "express": "^4.17.1",
+    "express": "^4.17.3",
     "firebase": "^6.4.2",
     "node-fetch": "^2.6.0",
     "react": "^16.9.0",
